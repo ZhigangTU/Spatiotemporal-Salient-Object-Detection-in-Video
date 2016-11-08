@@ -1,0 +1,27 @@
+function J = image_Jaco(Iu, Iv, transformType, xiTemp)
+
+if strcmp(transformType,'TRANSLATION'),
+    J = [ Iu, Iv ];
+                
+elseif strcmp(transformType,'SIMILARITY'),
+    J{fileIndex} = [ Iu .* ( cos(xiTemp(2)) * u - sin(xiTemp(2)) * v ) + Iv .* ( sin(xiTemp(2)) * u + cos(xiTemp(2)) * v ), ...
+        Iu .* ( -xiTemp(1)*sin(xiTemp(2))*u-xiTemp(1)*cos(xiTemp(2))*v ) + Iv.*(xiTemp(1)*cos(xiTemp(2))*u - xiTemp(1)*sin(xiTemp(2))*v), ...
+        Iu, Iv ];
+                
+elseif strcmp(transformType,'AFFINE'),
+        J{fileIndex} = [ Iu.*u,   Iu.*v,   Iu,   Iv.*u,   Iv.*v,   Iv ];
+                
+elseif strcmp(transformType,'HOMOGRAPHY'),
+
+     X = T_in{fileIndex}(1,1)*u + T_in{fileIndex}(1,2)*v + T_in{fileIndex}(1,3);
+     Y = T_in{fileIndex}(2,1)*u + T_in{fileIndex}(2,2)*v + T_in{fileIndex}(2,3);
+     N = T_in{fileIndex}(3,1)*u + T_in{fileIndex}(3,2)*v + 1;
+
+     J{fileIndex} = [ Iu .* u ./ N, Iu .* v ./ N, Iu ./ N, ...
+                    Iv .* u ./ N, Iv .* v ./ N, Iv ./ N, ...
+                    ( -Iu .* X .* u ./ ( N.^2 ) - Iv .* Y .* u ./ (N.^2) ), ...
+                    ( -Iu .* X .* v ./ ( N.^2 ) - Iv .* Y .* v ./ (N.^2) ) ];
+                
+else
+    error('Unrecognized transformation type in test_face_alignment.m');
+end
